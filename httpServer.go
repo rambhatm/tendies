@@ -10,14 +10,12 @@ Routes for the server
 */
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"strconv"
-)
 
-//pointer to stock DB
-var db *StockDB
+	"github.com/gorilla/mux"
+)
 
 func getAllStockSymbols(resp http.ResponseWriter, req *http.Request) {
 	log.Printf("endpoint: /stocks/")
@@ -30,10 +28,9 @@ func getStock(resp http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(resp).Encode(db.getStock(symbol))
 }
 
-//Creates the HTTP server for the given stock DB and port
-func InitHTTPServer(dbptr *StockDB, port int) {
+//InitHTTPServer Creates the HTTP server for the given port
+func InitHTTPServer(port int) {
 	log.Printf("Initing server on port %d", port)
-	db = dbptr
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/stocks/", getAllStockSymbols)

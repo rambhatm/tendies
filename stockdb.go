@@ -24,13 +24,17 @@ type StockDB struct {
 	sp500 map[string]stockData
 }
 
+//global pointer to stock DB
+var db *StockDB
+
 //Remove the , from prices
 func normalizeAmerican(old string) string {
 	return strings.Replace(old, ",", "", -1)
 }
 
-func (db *StockDB) init() {
-	db.sp500 = make(map[string]stockData)
+func (d *StockDB) init() {
+	d.sp500 = make(map[string]stockData)
+	db = d
 	return
 }
 
