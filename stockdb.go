@@ -11,7 +11,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
-type stockData struct {
+type StockData struct {
 	Symbol    string
 	Name      string
 	Weight    float64
@@ -21,7 +21,7 @@ type stockData struct {
 }
 
 type StockDB struct {
-	sp500 map[string]stockData
+	sp500 map[string]StockData
 }
 
 //global pointer to stock DB
@@ -33,7 +33,7 @@ func normalizeAmerican(old string) string {
 }
 
 func (d *StockDB) init() {
-	d.sp500 = make(map[string]stockData)
+	d.sp500 = make(map[string]StockData)
 	db = d
 	return
 }
@@ -52,7 +52,7 @@ func (db *StockDB) updateDB() {
 			price, _ := strconv.ParseFloat(normalizeAmerican(ele.ChildText("td:nth-of-type(5)")), 64)
 			change, _ := strconv.ParseFloat(normalizeAmerican(ele.ChildText("td:nth-of-type(6)")), 64)
 			changePct := ele.ChildText("td:nth-of-type(7)")
-			db.sp500[symbol] = stockData{symbol, name, weight, price, change, changePct}
+			db.sp500[symbol] = StockData{symbol, name, weight, price, change, changePct}
 			//fmt.Println(db.sp500[symbol])
 		})
 	})
@@ -64,6 +64,6 @@ func (db *StockDB) updateDB() {
 	}
 }
 
-func (db StockDB) getStock(stk string) stockData {
+func (db StockDB) getStock(stk string) StockData {
 	return db.sp500[stk]
 }
