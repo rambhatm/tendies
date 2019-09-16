@@ -1,6 +1,5 @@
 package main
 
-//"fmt"
 import (
 	"html/template"
 	"log"
@@ -11,8 +10,6 @@ func main() {
 	var db StockDB
 	db.init()
 	db.updateDB()
-	//InitHTTPServer(4000)
-	//fmt.Println(db.getStock("AMZN"))
 
 	templates := template.Must(template.ParseFiles("templates/app.htm"))
 
