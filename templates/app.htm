@@ -11,29 +11,36 @@
     <title>Tendies - get rich!</title>
   </head>
   <body>
-    <h1 class="display-2">Tendies</h1>
-    <p class="lead">
-        Make $$$ happen
-    </p>
-
-    <form action="/stocks" method="POST">
-        <div class="form-group">
-          <input type="text" class="form-control" id="stockSearch" aria-describedby="searchHelp" placeholder="AAPL">
-          <small id="searchHelp" class="form-text text-muted">Enter stock symbol or name</small>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Search</button>
-      </form>
-{{if .Success}}
-    <div class="card" style="width: 18rem;">
-      <img src="..." class="card-img-top" alt="...">
-      <div class="card-body">
-        <h5 class="card-title">{{.message}}</h5>
-        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-        <a href="#" class="btn btn-primary">Go somewhere</a>
+      <div class="container">
+          <div class="row">
+            <div class="col-sm">
+                <h1 class="display-2">Tendies</h1>
+                <p class="lead">Make $$$ happen</p>
+            
+                <form action="/stocks" method="GET" enctype="application/x-www-form-urlencoded">
+                    <div class="form-group">
+                      <input type="text" class="form-control" name="stockSearch" aria-describedby="searchHelp" placeholder="AAPL">
+                      <small id="searchHelp" class="form-text text-muted">Enter stock symbol or name</small>
+                    </div>
+            
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            
+                {{if .Success}}
+                <div class="card" style="width: 18rem;">
+                  <img src="..." class="card-img-top" alt="...">
+                  <div class="card-body">
+                    <h5 class="card-title">{{.Stock.Name}}</h5>
+                    <p class="card-text">{{.Stock.Price}}</p>
+                    <a href="#" class="btn btn-primary">Buy STOCK!!!</a>
+                  </div>
+                </div>
+                {{end}}
+            </div>
+          </div>
       </div>
-    </div>
-{{end}}
+    
+ 
 
     <!-- Optional JavaScript -->
 

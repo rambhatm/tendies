@@ -21,16 +21,17 @@ func main() {
 	})
 
 	http.HandleFunc("/stocks", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
+		if r.Method != http.MethodGet {
 			templates.Execute(w, nil)
 		}
 		symbol := r.FormValue("stockSearch")
-		log.Printf("POST request on /stocks : %s", symbol)
+		log.Printf("GET request on /stocks : %s", symbol)
+		stock := db.getStock(symbol)
 
 		templates.Execute(w, struct {
-			success bool
-			message string
-		}{true, "yay!!" + symbol})
+			Success bool
+			Stock   StockData
+		}{true, stock})
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
