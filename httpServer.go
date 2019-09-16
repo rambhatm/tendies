@@ -10,6 +10,7 @@ Routes for the server
 */
 import (
 	"encoding/json"
+	//"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,13 +29,21 @@ func getStock(resp http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(resp).Encode(db.getStock(symbol))
 }
 
+func app(w http.ResponseWriter, r *http.Request) {
+
+}
+
 //InitHTTPServer Creates the HTTP server for the given port
 func InitHTTPServer(port int) {
 	log.Printf("Initing server on port %d", port)
 	router := mux.NewRouter().StrictSlash(true)
+	_ = router
+	//var templates = template.Must(template.ParseFiles("app.html"))
 
-	router.HandleFunc("/stocks/", getAllStockSymbols)
-	router.HandleFunc("/stock/{symbol}/", getStock)
+	http.HandleFunc("/", app)
+
+	//router.HandleFunc("/stocks/", getAllStockSymbols)
+	//router.HandleFunc("/stock/{symbol}/", getStock)
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))
 }
