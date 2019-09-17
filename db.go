@@ -14,7 +14,25 @@ import (
 const (
 	stockdbfile = "db/stock.db"
 	userdbfile  = "db/user.db"
+	tradedb     = "db/trade.db"
 )
+
+//inserts key value pair into dbfile
+func insertDB(dbfile string, key string, val bytes.Buffer) bool {
+	db, err := leveldb.OpenFile(dbfile, nil)
+	if err != nil {
+		log.Fatal("%s DB open error", dbfile)
+		return false
+	}
+	defer db.Close()
+
+	err = db.Put([]byte(key), val.Bytes(), nil)
+	if err != nil {
+		log.Fatal("%s DB open error", dbfile)
+		return false
+	}
+	return true
+}
 
 //InsertStockDB encodes and inserts stock into stock DB
 func InsertStockDB(symbol string, stock StockData) bool {
@@ -23,19 +41,7 @@ func InsertStockDB(symbol string, stock StockData) bool {
 	enc := gob.NewEncoder(&gobstock)
 	_ = enc.Encode(stock)
 
-	stockdb, err := leveldb.OpenFile(stockdbfile, nil)
-	if err != nil {
-		log.Fatal("Stockdb open error")
-		return false
-	}
-	defer stockdb.Close()
-
-	err = stockdb.Put([]byte(symbol), gobstock.Bytes(), nil)
-	if err != nil {
-		log.Fatal("StockDB insert error")
-		return false
-	}
-	return true
+	return insertDB(stockdbfile, symbol, gobstock)
 }
 
 //GetStockDB decodes and returns stock
@@ -53,4 +59,14 @@ func GetStockDB(symbol string) (stock StockData) {
 	dec := gob.NewDecoder(gobstock)
 	dec.Decode(&stock)
 	return
+}
+
+//InsertUserDB encodes and inserts user into the DB
+func InsertUserDB(username string, u User) bool {
+	//Encode to gob,needed for structs
+	var gobuser bytes.Buffer
+	enc := gob.NewEncoder(&gobuser)
+	_ = enc.Encode(u)
+
+	return insertDB(userdbfile, username, gobuser)
 }
