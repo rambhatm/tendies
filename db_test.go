@@ -10,4 +10,8 @@ func TestDB(t *testing.T) {
 	if err != true {
 		t.Errorf("Unable to insert into stock DB")
 	}
+	stock2 := GetStockDB("AAPL")
+	if stock2.Name != "apple" {
+		t.Errorf("Error with stock get from DB")
+	}
 }
