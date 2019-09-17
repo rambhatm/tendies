@@ -20,9 +20,9 @@ func NewUser(name string) User {
 		Cash:     100000.00,
 		//userStockData: make(Stocks, 0),
 	}
-	inserted := InsertUserDB(name, u)
-	if inserted == false {
-		return nil
+	if ok := InsertUserDB(name, u); !ok {
+		//TODO XXX
+		return u
 	}
 	return u
 }

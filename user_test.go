@@ -6,9 +6,7 @@ import (
 
 func TestUser(t *testing.T) {
 	u := NewUser("ram")
-	if u == nil {
-		t.Errorf("Unable to allocate user")
-	}
+
 	stock := StockData{"AAPL", "apple", 55.0, 111.1, 11.1, "2"}
 	err := InsertStockDB("AAPL", stock)
 	if err != true {

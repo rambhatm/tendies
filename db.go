@@ -21,14 +21,14 @@ const (
 func insertDB(dbfile string, key string, val bytes.Buffer) bool {
 	db, err := leveldb.OpenFile(dbfile, nil)
 	if err != nil {
-		log.Fatal("%s DB open error", dbfile)
+		log.Fatal("DB open error")
 		return false
 	}
 	defer db.Close()
 
 	err = db.Put([]byte(key), val.Bytes(), nil)
 	if err != nil {
-		log.Fatal("%s DB open error", dbfile)
+		log.Fatal("DB open error")
 		return false
 	}
 	return true
