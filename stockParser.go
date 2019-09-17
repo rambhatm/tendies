@@ -4,7 +4,7 @@ package main
 This file handles the job of genererating/updating the stock DB
 */
 import (
-	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -20,25 +20,13 @@ type StockData struct {
 	ChangePct string
 }
 
-type StockDB struct {
-	sp500 map[string]StockData
-}
-
-//global pointer to stock DB
-var db *StockDB
-
 //Remove the , from prices
 func normalizeAmerican(old string) string {
 	return strings.Replace(old, ",", "", -1)
 }
 
-func (d *StockDB) init() {
-	d.sp500 = make(map[string]StockData)
-	db = d
-	return
-}
-
-func (db *StockDB) updateDB() {
+//ParseAndUpdateStockDB gets stock data from website and updates the website
+func ParseAndUpdateStockDB() {
 
 	c := colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"),
@@ -52,18 +40,17 @@ func (db *StockDB) updateDB() {
 			price, _ := strconv.ParseFloat(normalizeAmerican(ele.ChildText("td:nth-of-type(5)")), 64)
 			change, _ := strconv.ParseFloat(normalizeAmerican(ele.ChildText("td:nth-of-type(6)")), 64)
 			changePct := ele.ChildText("td:nth-of-type(7)")
-			db.sp500[symbol] = StockData{symbol, name, weight, price, change, changePct}
-			//fmt.Println(db.sp500[symbol])
+
+			dataInserted := InsertStockDB(symbol, StockData{symbol, name, weight, price, change, changePct})
+			if dataInserted == false {
+				log.Fatal("Insert to stock db failed")
+			}
+
 		})
 	})
-	//fmt.Printf("Sp500 database extracted %d", len(db.sp500))
 
 	err := c.Visit("https://www.slickcharts.com/sp500")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal("Unable to visit site")
 	}
-}
-
-func (db StockDB) getStock(stk string) StockData {
-	return db.sp500[stk]
 }

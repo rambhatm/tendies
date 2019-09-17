@@ -7,9 +7,7 @@ import (
 )
 
 func main() {
-	var db StockDB
-	db.init()
-	db.updateDB()
+	ParseAndUpdateStockDB()
 
 	templates := template.Must(template.ParseFiles("templates/app.htm"))
 
@@ -23,7 +21,7 @@ func main() {
 		}
 		symbol := r.FormValue("stockSearch")
 		log.Printf("GET request on /stocks : %s", symbol)
-		stock := db.getStock(symbol)
+		stock := GetStockDB(symbol)
 
 		templates.Execute(w, struct {
 			Success bool
