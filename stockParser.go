@@ -11,6 +11,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
+//StockData is the per-stock type and holds stock info, in the database it is the value for the key(Symbol)
 type StockData struct {
 	Symbol    string
 	Name      string
@@ -25,7 +26,7 @@ func normalizeAmerican(old string) string {
 	return strings.Replace(old, ",", "", -1)
 }
 
-//ParseAndUpdateStockDB gets stock data from website and updates the website
+//ParseAndUpdateStockDB gets stock data from website and updates the databse
 func ParseAndUpdateStockDB() {
 
 	c := colly.NewCollector(

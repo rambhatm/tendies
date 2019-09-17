@@ -1,5 +1,5 @@
 //This is the only file that directly deals with a database
-//currently using  level DB https://github.com/syndtr/goleveldb
+//currently using  level DB bindings for go https://github.com/syndtr/goleveldb
 
 package main
 
@@ -12,18 +12,18 @@ import (
 )
 
 const (
-	STOCKDB = "db/stock.db"
-	USERDB  = "db/user.db"
+	stockdbfile = "db/stock.db"
+	userdbfile  = "db/user.db"
 )
 
 //InsertStockDB encodes and inserts stock into stock DB
 func InsertStockDB(symbol string, stock StockData) bool {
-	//Encode t0o gob
+	//Encode to gob,needed for structs
 	var gobstock bytes.Buffer
 	enc := gob.NewEncoder(&gobstock)
 	_ = enc.Encode(stock)
 
-	stockdb, err := leveldb.OpenFile(STOCKDB, nil)
+	stockdb, err := leveldb.OpenFile(stockdbfile, nil)
 	if err != nil {
 		log.Fatal("Stockdb open error")
 		return false
@@ -40,7 +40,7 @@ func InsertStockDB(symbol string, stock StockData) bool {
 
 //GetStockDB decodes and returns stock
 func GetStockDB(symbol string) (stock StockData) {
-	stockdb, err := leveldb.OpenFile(STOCKDB, nil)
+	stockdb, err := leveldb.OpenFile(stockdbfile, nil)
 	if err != nil {
 		log.Fatal("Stockdb open error")
 		return
