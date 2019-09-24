@@ -72,3 +72,38 @@ func (a AuthData) IsMatch(plaintextPassword string) (match bool, cookie http.Coo
 	}
 	return
 }
+
+// VerifyCookie parses the http request, verifies JWT
+func VerifyCookie(r *http.Request) (status int, username string) {
+	cookie, err := r.Cookie("jwt-token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			status = http.StatusUnauthorized
+			return
+		}
+		status = http.StatusBadRequest
+		return
+	}
+	tokenStr := cookie.Value
+	claims := &claims{}
+
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			status = http.StatusUnauthorized
+			return
+		}
+		status = http.StatusBadRequest
+		return
+	}
+	if !token.Valid {
+		status = http.StatusUnauthorized
+		return
+	}
+	username = claims.Username
+	status = http.StatusOK
+	return
+}
