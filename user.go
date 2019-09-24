@@ -8,17 +8,19 @@ type userStockData struct {
 
 //User per-user object that stores the list of stocks/free cash
 type User struct {
-	Username string
-	Cash     float64
-	Stocks   []userStockData
+	Auth AuthData
+	Cash float64
+	//Tradekeys    []uint64 //array of pointers to trades done by user
 }
 
 //NewUser Creates new user and returns a User object
-func NewUser(name string) User {
+func NewUser(name string, passHash string) User {
 	u := User{
-		Username: name,
-		Cash:     100000.00,
-		//userStockData: make(Stocks, 0),
+		Auth: AuthData{
+			Username:     name,
+			PasswordHash: passHash,
+		},
+		Cash: 100000.00,
 	}
 	if ok := InsertUserDB(name, u); !ok {
 		//TODO XXX
@@ -33,7 +35,7 @@ func (u *User) BuyStock(symbol string, qty int32) bool {
 	if (stock.Price * float64(qty)) > u.Cash {
 		return false
 	}
-	u.Stocks = append(u.Stocks, userStockData{symbol, qty, stock.Price})
+	//u.Stocks = append(u.Stocks, userStockData{symbol, qty, stock.Price})
 	u.Cash -= (stock.Price * float64(qty))
 	return true
 
