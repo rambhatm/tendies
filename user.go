@@ -21,7 +21,7 @@ func NewUser(name string) User {
 		//userStockData: make(Stocks, 0),
 	}
 	if ok := InsertUserDB(name, u); !ok {
-		//TODO XXX
+		//TODO error handling
 		return u
 	}
 	return u
