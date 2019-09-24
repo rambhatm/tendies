@@ -14,12 +14,9 @@ type User struct {
 }
 
 //NewUser Creates new user and returns a User object
-func NewUser(name string, passHash string) User {
+func NewUser(name string, plaintextPassword string) User {
 	u := User{
-		Auth: AuthData{
-			Username:     name,
-			PasswordHash: passHash,
-		},
+		Auth: NewAuthData(name, plaintextPassword),
 		Cash: 100000.00,
 	}
 	if ok := InsertUserDB(name, u); !ok {
