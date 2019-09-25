@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	//ParseAndUpdateStockDB()
+	go ParseAndUpdateStockDB()
 
 	templates := template.Must(template.ParseFiles("templates/app.htm"))
 
