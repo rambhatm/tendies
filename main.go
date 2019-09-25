@@ -4,9 +4,14 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
 	go ParseAndUpdateStockDB()
 
 	templates := template.Must(template.ParseFiles("templates/app.htm"))
@@ -29,5 +34,5 @@ func main() {
 		}{true, stock})
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
