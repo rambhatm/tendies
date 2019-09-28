@@ -14,7 +14,7 @@ func main() {
 	}
 	go ParseAndUpdateStockDB()
 
-	templates := template.Must(template.ParseFiles("templates/app.htm", "templates/header.htm", "templates/footer.htm", "templates/searchStock.htm"))
+	templates := template.Must(template.ParseGlob("templates/*.htm"))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		templates.Execute(w, nil)
