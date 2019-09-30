@@ -8,8 +8,9 @@ type userStockData struct {
 
 //User per-user object that stores the list of stocks/free cash
 type User struct {
-	Auth AuthData
-	Cash float64
+	//ID   string   `json:"id" bson:"_id"`
+	Auth AuthData `json: "auth" bson: "auth"`
+	Cash float64  `json: "cash" bson: "cash"`
 	//Tradekeys    []uint64 //array of pointers to trades done by user
 }
 
@@ -18,10 +19,6 @@ func NewUser(name string, plaintextPassword string) User {
 	u := User{
 		Auth: NewAuthData(name, plaintextPassword),
 		Cash: 100000.00,
-	}
-	if ok := InsertUserDB(name, u); !ok {
-		//TODO error handling
-		return u
 	}
 	return u
 }

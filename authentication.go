@@ -1,20 +1,21 @@
 package main
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Create the JWT key used to create the signature
 var jwtKey = []byte("my_secret_key")
 
 type AuthData struct {
-	Username     string
-	IsTrial      bool   //true : no password, only username. trial users like discord
-	PasswordHash []byte //bcrypt hash of password
+	Username     string `json: "_id" bson: "_id"`
+	IsTrial      bool   `json: "isTrial" bson: "isTrial"`           //true : no password, only username. trial users like discord
+	PasswordHash []byte `json: "passwordHash" bson: "passwordHash"` //bcrypt hash of password
 }
 
 //NewAuthData returns an authdata object. if plaintextpassword is "" create a trial account like discord

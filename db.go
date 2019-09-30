@@ -5,17 +5,76 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"log"
 
 	"github.com/syndtr/goleveldb/leveldb"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	stockdbfile = "db/stock.db"
-	userdbfile  = "db/user.db"
-	tradedb     = "db/trade.db"
+	stockdbfile     = "db/stock.db"
+	herokuDB        = "heroku_kmkcwhkx"
+	registeredUsers = "users"
+	tradedb         = "db/trade.db"
 )
+
+// Set client options
+//TODO use env var
+var clientOptions = options.Client().ApplyURI("")
+
+func InsertUserToDB(u User) (err error) {
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal("cannot connect to mongodb")
+	}
+	defer client.Disconnect(context.TODO())
+
+	collection := client.Database(herokuDB).Collection(registeredUsers)
+
+	insertResult, err := collection.InsertOne(context.TODO(), u)
+	if err != nil {
+		log.Printf("error: unable to insert to user DB %s", err)
+		return
+	}
+
+	//_, err = collection.Indexes().CreateOne(
+	//	context.Background(),
+	//	mongo.IndexModel{
+	//		Keys:    bsonx.Doc{{"auth.username", bsonx.Int32(1)}},
+	//		Options: options.Index().SetUnique(true),
+	//	},
+	//)
+
+	log.Printf("Inserted new user: %s id: %s ", u.Auth.Username, insertResult.InsertedID)
+	return
+}
+
+func GetUserFromDB(username string) (found bool, u User) {
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal("cannot connect to mongodb")
+	}
+	defer client.Disconnect(context.TODO())
+
+	collection := client.Database(herokuDB).Collection(registeredUsers)
+
+	filter := bson.D{{"username", username}}
+
+	err = collection.FindOne(context.TODO(), filter).Decode(&u)
+	if err != nil {
+		log.Printf("Unable to find username: %s err: %s", username, err)
+		found = false
+		return
+	}
+	found = true
+	return
+}
+
+///MONGODB
 
 //inserts key value pair into dbfile
 func insertDB(dbfile string, key string, val bytes.Buffer) bool {
@@ -48,7 +107,7 @@ func InsertStockDB(symbol string, stock StockData) bool {
 func GetStockDB(symbol string) (stock StockData) {
 	stockdb, err := leveldb.OpenFile(stockdbfile, nil)
 	if err != nil {
-		log.Fatal("Stockdb open error")
+		log.Fatal("Stockdb open error ", err)
 		return
 	}
 	defer stockdb.Close()
@@ -59,14 +118,4 @@ func GetStockDB(symbol string) (stock StockData) {
 	dec := gob.NewDecoder(gobstock)
 	dec.Decode(&stock)
 	return
-}
-
-//InsertUserDB encodes and inserts user into the DB
-func InsertUserDB(username string, u User) bool {
-	//Encode to gob,needed for structs
-	var gobuser bytes.Buffer
-	enc := gob.NewEncoder(&gobuser)
-	_ = enc.Encode(u)
-
-	return insertDB(userdbfile, username, gobuser)
 }
