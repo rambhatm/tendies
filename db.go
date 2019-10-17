@@ -101,7 +101,7 @@ func getStock(client *mongo.Client, sym string) (found bool, s StockData) {
 
 	err := infoCollection.FindOne(context.TODO(), filter).Decode(&s)
 	if err != nil {
-		log.Printf("<DB error> finding stock: %s in stockinfo : %s", s.Symbol, err)
+		log.Printf("<DB error> finding stock: %s in stockinfo : %s", sym, err)
 		return
 	}
 	if sym == s.Symbol {

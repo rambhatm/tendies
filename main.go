@@ -15,6 +15,8 @@ func main() {
 		port = "80"
 	}
 
+	ParseAndUpdateStockDB()
+
 	cronJob := cron.New()
 	cronJob.AddFunc("@hourly", ParseAndUpdateStockDB)
 	cronJob.Start()
