@@ -13,12 +13,12 @@ import (
 
 //StockData is the per-stock type and holds stock info, in the database it is the value for the key(Symbol)
 type StockData struct {
-	Symbol    string
-	Name      string
-	Weight    float64
-	Price     float64
-	Change    float64
-	ChangePct string
+	Symbol    string  `json: "symbol" bson: "symbol"`
+	Name      string  `json: "name" bson: "name"`
+	Weight    float64 `json: "weight" bson: "weight"`
+	Price     float64 `json: "price" bson: "price"`
+	Change    float64 `json:"-" bson:"-"`
+	ChangePct string  `json: "-" bson: "-"`
 }
 
 //Remove the , from prices

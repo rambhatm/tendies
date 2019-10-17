@@ -4,22 +4,25 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
+	"fmt"
 	"log"
 
-	"github.com/syndtr/goleveldb/leveldb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	stockdbfile     = "db/stock.db"
-	herokuDB        = "heroku_kmkcwhkx"
+
+	//Heroku mongo DB name
+	herokuDB = "heroku_kmkcwhkx"
+
+	//Collections
 	registeredUsers = "users"
-	tradedb         = "db/trade.db"
+	stockInfo       = "stockInfo" //Stores current price and stock details
+	stockHist       = "stockHist"
+	trades          = "trades"
 )
 
 // Set client options
@@ -74,48 +77,41 @@ func GetUserFromDB(username string) (found bool, u User) {
 	return
 }
 
-///MONGODB
-
-//inserts key value pair into dbfile
-func insertDB(dbfile string, key string, val bytes.Buffer) bool {
-	db, err := leveldb.OpenFile(dbfile, nil)
+//UpdateStockToDB updates the current stock value in stockinfo, and updates history if price is different
+func UpdateStockToDB(s StockData) (err error) {
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal("DB open error")
-		return false
+		log.Fatal("cannot connect to mongodb")
 	}
-	defer db.Close()
+	defer client.Disconnect(context.TODO())
 
-	err = db.Put([]byte(key), val.Bytes(), nil)
+	collection := client.Database(herokuDB).Collection(stockInfo)
+	filter := bson.D{{"symbol", s.Symbol}}
+
+	var curr StockData
+	err = collection.FindOne(context.TODO(), filter).Decode(&curr)
 	if err != nil {
-		log.Fatal("DB open error")
-		return false
-	}
-	return true
-}
-
-//InsertStockDB encodes and inserts stock into stock DB
-func InsertStockDB(symbol string, stock StockData) bool {
-	//Encode to gob,needed for structs
-	var gobstock bytes.Buffer
-	enc := gob.NewEncoder(&gobstock)
-	_ = enc.Encode(stock)
-
-	return insertDB(stockdbfile, symbol, gobstock)
-}
-
-//GetStockDB decodes and returns stock
-func GetStockDB(symbol string) (stock StockData) {
-	stockdb, err := leveldb.OpenFile(stockdbfile, nil)
-	if err != nil {
-		log.Fatal("Stockdb open error ", err)
+		log.Printf("<DB error> finding stock: %s in stockinfo : %s", s.Symbol, err)
 		return
 	}
-	defer stockdb.Close()
+	if curr.Symbol == s.Symbol {
+		if curr.Price != s.Price {
+			//Update the price and set history
+			filter := bson.D{{"name", "Ash"}}
 
-	data, err := stockdb.Get([]byte(symbol), nil)
-	//Decode the value from gob
-	gobstock := bytes.NewBuffer(data)
-	dec := gob.NewDecoder(gobstock)
-	dec.Decode(&stock)
-	return
+			update := bson.D{
+				{"$set", bson.D{
+					{"price", s.Price},
+				}},
+			}
+
+			updateResult, err = collection.UpdateOne(context.TODO(), filter, update)
+			if err != nil {
+				log.Printf("<DB error>Updating stock: %s in stockinfo : %s", s.Symbol, err)
+				return
+			}
+
+			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+		}
+	}
 }
