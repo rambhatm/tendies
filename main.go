@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/robfig/cron"
 )
 
 func main() {
@@ -12,7 +14,10 @@ func main() {
 	if port == "" {
 		port = "80"
 	}
-	go ParseAndUpdateStockDB()
+
+	cronJob := cron.New()
+	cronJob.AddFunc("@hourly", ParseAndUpdateStockDB())
+	cronJob.Start()
 
 	templates := template.Must(template.ParseGlob("templates/*.htm"))
 
