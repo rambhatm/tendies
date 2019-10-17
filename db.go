@@ -5,8 +5,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -77,6 +77,21 @@ func GetUserFromDB(username string) (found bool, u User) {
 	return
 }
 
+func insertHistoryDB(client *mongo.Client, s StockData) (err error) {
+	//Set the price in history databse for the symbol collection
+	histCollection := client.Database(herokuDB).Collection(s.Symbol)
+	var sHist StockHistory
+	sHist.Timestamp = time.Now()
+	sHist.Price = s.Price
+
+	_, err = histCollection.InsertOne(context.TODO(), sHist)
+	if err != nil {
+		log.Printf("<DB error> unable to add to historyDB", err)
+		return
+	}
+	return
+}
+
 //UpdateStockToDB updates the current stock value in stockinfo, and updates history if price is different
 func UpdateStockToDB(s StockData) (err error) {
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -85,11 +100,11 @@ func UpdateStockToDB(s StockData) (err error) {
 	}
 	defer client.Disconnect(context.TODO())
 
-	collection := client.Database(herokuDB).Collection(stockInfo)
+	infoCollection := client.Database(herokuDB).Collection(stockInfo)
 	filter := bson.D{{"symbol", s.Symbol}}
 
 	var curr StockData
-	err = collection.FindOne(context.TODO(), filter).Decode(&curr)
+	err = infoCollection.FindOne(context.TODO(), filter).Decode(&curr)
 	if err != nil {
 		log.Printf("<DB error> finding stock: %s in stockinfo : %s", s.Symbol, err)
 		return
@@ -105,13 +120,24 @@ func UpdateStockToDB(s StockData) (err error) {
 				}},
 			}
 
-			updateResult, err = collection.UpdateOne(context.TODO(), filter, update)
+			_, err = infoCollection.UpdateOne(context.TODO(), filter, update)
 			if err != nil {
 				log.Printf("<DB error>Updating stock: %s in stockinfo : %s", s.Symbol, err)
 				return
 			}
 
-			fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+			insertHistoryDB(client, s)
+
 		}
+		//noting else to do, we have the latest price
+	} else {
+		//insert into stockinfo for the first time
+		_, err = infoCollection.InsertOne(context.TODO(), s)
+		if err != nil {
+			log.Printf("<DB error>: unable to insert stock info %s", err)
+			return
+		}
+		insertHistoryDB(client, s)
 	}
+	return
 }

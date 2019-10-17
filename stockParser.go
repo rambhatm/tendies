@@ -42,10 +42,7 @@ func ParseAndUpdateStockDB() {
 			change, _ := strconv.ParseFloat(normalizeAmerican(ele.ChildText("td:nth-of-type(6)")), 64)
 			changePct := ele.ChildText("td:nth-of-type(7)")
 
-			dataInserted := InsertStockDB(symbol, StockData{symbol, name, weight, price, change, changePct})
-			if dataInserted == false {
-				log.Fatal("Insert to stock db failed")
-			}
+			_ = UpdateStockToDB(StockData{strings.ToLower(symbol), name, weight, price, change, changePct})
 
 		})
 	})
