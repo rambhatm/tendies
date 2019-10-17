@@ -16,7 +16,7 @@ func main() {
 	}
 
 	cronJob := cron.New()
-	cronJob.AddFunc("@hourly", ParseAndUpdateStockDB())
+	cronJob.AddFunc("@hourly", ParseAndUpdateStockDB)
 	cronJob.Start()
 
 	templates := template.Must(template.ParseGlob("templates/*.htm"))
@@ -33,12 +33,14 @@ func main() {
 		}
 		symbol := r.FormValue("stockSearch")
 		log.Printf("GET request on /stocks : %s", symbol)
-		stock := GetStockDB(symbol)
+		found, stock := GetStockDB(symbol)
 
-		templates.Execute(w, struct {
-			Success bool
-			Stock   StockData
-		}{true, stock})
+		if found {
+			templates.Execute(w, struct {
+				Success bool
+				Stock   StockData
+			}{true, stock})
+		}
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))

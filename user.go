@@ -25,7 +25,7 @@ func NewUser(name string, plaintextPassword string) User {
 
 //BuyStock buys stock with symbol for the user. returns false if user cannot buy stock
 func (u *User) BuyStock(symbol string, qty int32) bool {
-	stock := GetStockDB(symbol)
+	_, stock := GetStockDB(symbol)
 	if (stock.Price * float64(qty)) > u.Cash {
 		return false
 	}
