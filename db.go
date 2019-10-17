@@ -29,7 +29,7 @@ const (
 
 // Set client options
 //TODO use env var
-var mongodbURI = os.Getenv("MONGODB_URI") + "?retryWrites=true"
+var mongodbURI = os.Getenv("MONGODB_URI") + "?retryWrites=false"
 var clientOptions = options.Client().ApplyURI(mongodbURI)
 
 func InsertUserToDB(u User) (err error) {
